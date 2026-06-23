@@ -1,240 +1,139 @@
 # Tailored Mini-Demo Generator
 
-## Overview
+## What the System Generates
 
-This project automates the creation of personalized automation proposals for prospective businesses.
-
-Given a company's website URL, the workflow researches the business, identifies a realistic manual process that could benefit from automation, and generates a tailored one-page artifact titled:
+For each prospect, the workflow creates a one-page artifact titled:
 
 **"The Automation We'd Build for [Company]"**
 
-The artifact includes:
+The artifact contains:
 
-* Identified operational pain point
-* Proposed automation solution
-* Workflow diagram / process outline
-* Personalized outreach hook
-* Cold email snippet
+* Spotted Pain Point
+* Proposed Automation
+* Workflow Diagram / Process Flow
+* Call-to-Action (CTA)
+* Personalized Cold Email Snippet
 
-The system is designed to prioritize **grounding and relevance** over generic AI-generated suggestions. Recommendations are based on information extracted from the prospect's website rather than assumptions.
-
----
-
-## Sample Workflow
-
-Prospect URL
-
-↓
-
-Website Scraping
-
-↓
-
-Content Cleaning
-
-↓
-
-
-Automation Opportunity Identification
-
-↓
-
-Artifact Generation
-
-↓
-
-HTML Output
-
-↓
-
-Save to Output Folder
+The recommendations are generated using information extracted from the prospect's website and are designed to be specific to the business rather than generic automation suggestions.
 
 ---
 
-## Architecture Decisions
-
-### Where I Used Deterministic Workflows
-
-The following steps are predictable and rule-based, so they are implemented using standard workflow logic:
-
-#### Website Scraping
-
-Responsible for extracting content from the prospect's website.
-
-Reason:
-
-* No reasoning required
-* Simple data collection task
-* Lower cost and more reliable than using an LLM
-
-#### Content Cleaning
-
-Removes navigation links, boilerplate text, repeated content, and formatting noise.
-
-Reason:
-
-* Structured transformation task
-* Faster and cheaper than an agent
-
-#### HTML Generation
-
-Converts generated content into a standardized artifact template.
-
-Reason:
-
-* Consistent output structure
-* No need for autonomous reasoning
-
----
-
-### Where I Used an LLM Agent
-
-#### Automation Opportunity Identification
-
-This is the only stage where an LLM is required.
-
-Responsibilities:
-
-* Understand the business model
-* Identify a likely manual process
-* Evaluate whether automation would provide value
-* Generate a realistic proposal
-* Create a personalized outreach hook
-
-Reason:
-This step requires contextual reasoning and business understanding, making it a good candidate for an agent.
-
----
-
-## Grounding Strategy
-
-To avoid hallucinated recommendations:
-
-* The agent only receives cleaned website content.
-* Recommendations must reference information found on the prospect's website.
-* The workflow prefers a smaller, well-supported recommendation over a speculative one.
-* If insufficient information exists, the workflow generates a conservative proposal rather than inventing problems.
-
----
-
-## Error Handling
-
-The workflow is designed so that a single failed prospect does not stop the entire batch.
-
-Implemented safeguards:
-
-* Independent processing per prospect
-* Continue-on-error behavior
-* Fallback outputs for failed analyses
-* Output logging for troubleshooting
-
----
-
-## Cost Controls
-
-To keep execution inexpensive:
-
-* Only one LLM analysis pass per prospect
-* Website content is cleaned before being sent to the model
-* Deterministic tasks do not use AI
-* Limited context size to reduce token usage
-
----
-
-## Technologies Used
-
-### Workflow Automation
-
-* n8n
-
-### AI Model
-
-* Google Gemini
-* Groq (alternative model support)
-* OpenRouter (optional)
-
-### Scripting
-
-* JavaScript
-
-### Output Format
-
-* HTML
-
----
-
-## Project Structure
+## High-Level Workflow
 
 ```text
-.
-├── workflow.json
-├── prospects.json
-├── outputs/
-│   ├── company1.html
-│   ├── company2.html
-│   └── company3.html
-├── screenshots/
-│   └── workflow.png
-└── README.md
+Input Prospect URL
+        │
+        ▼
+ Website Research
+        │
+        ▼
+ Content Extraction
+        │
+        ▼
+ Content Cleaning
+        │
+        ▼
+ Automation Opportunity Identification
+        │
+        ▼
+ Artifact Generation
+        │
+        ▼
+ HTML Report Creation
+        │
+        ▼
+ Output Storage
 ```
 
 ---
 
-## How to Run
+## Agent vs Workflow Decisions
 
-### 1. Import Workflow
+### Workflow Components
 
-Import `workflow.json` into n8n.
+#### Website Research
 
-### 2. Configure Credentials
+Responsible for:
 
-Add the required API credentials:
+* Fetching website content
+* Extracting relevant text
 
-* Gemini API Key
-* Groq API Key (optional)
-* OpenRouter API Key (optional)
+Reason:
 
-### 3. Provide Prospect List
-
-Update `prospects.json` with company website URLs.
-
-### 4. Execute Workflow
-
-Run the workflow from the trigger node.
-
-### 5. View Outputs
-
-Generated artifacts will be written to the output directory.
+No reasoning is required. The task is purely data collection.
 
 ---
 
-## Example Output
+#### Content Cleaning
 
-For each prospect the workflow generates:
+Responsible for:
+
+* Removing navigation text
+* Removing duplicate content
+* Filtering irrelevant sections
+* Preparing context for the model
+
+Reason:
+
+This is a deterministic transformation problem and does not require an agent.
+
+---
+
+#### HTML Generation
+
+Responsible for:
+
+* Formatting the final artifact
+* Applying templates
+* Generating standardized reports
+
+Reason:
+
+Output structure is fixed and predictable.
+
+---
+
+### Agent Component
+
+#### Automation Opportunity Identification
+
+Responsibilities:
+
+* Understanding website content
+* Identifying a realistic manual process
+* Proposing a relevant automation
+* Creating a personalized CTA
+* Generating a cold email snippet
+
+Reason:
+
+This requires contextual reasoning and judgment, making it the only stage where an LLM is necessary.
+
+---
+
+## Sample Output Structure
 
 ### The Automation We'd Build for [Company]
 
-* Company Summary
-* Identified Pain Point
-* Proposed Automation
-* Workflow Diagram
-* Outreach Hook
-* Cold Email Snippet
+#### Spotted Pain Point
 
----
+Manual process identified from website content.
 
-## Future Improvements
+#### Proposed Automation
 
-If given additional time, I would add:
+Suggested automation workflow.
 
-* LinkedIn enrichment
-* Company size detection
-* Multi-page website research
-* Lead scoring
-* CRM integration (HubSpot/Salesforce)
-* Automated outreach generation
-* PDF export support
-* Human review workflow before sending
+#### Process Flow
+
+Simple workflow diagram or step sequence.
+
+#### CTA
+
+One-line personalized outreach hook.
+
+#### Cold Email Snippet
+
+Personalized email referencing the generated proposal.
 
 ---
 
