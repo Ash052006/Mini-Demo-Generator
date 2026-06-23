@@ -1,0 +1,303 @@
+{
+  "name": "Mini-Demo Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c5d5c413-2e3d-48bc-9fba-a15ed3148382",
+      "name": "When clicking \"Test workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        512
+      ],
+      "id": "db9d0446-8335-461d-b44c-dc59159be5ae",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "amzxPMmcfn8MVJGe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        512
+      ],
+      "id": "0dbbb918-189b-4ab7-b069-f45be3272ab1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gTsBaMt81wI4J0et",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-chat-v3-0324",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "6c2aa007-2dcf-46d6-9df0-f9721dc321cc",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Lh4NEdUdLCjOmNPe",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "D:\\Projects\\PratapAISolutions",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2048,
+        416
+      ],
+      "id": "7d1b5d9b-f84e-4e68-af3d-c7c3f846fcee",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = $json.html;\n\nreturn {\n  binary: {\n    data: {\n      data: Buffer.from(html).toString('base64'),\n      mimeType: 'text/html',\n      fileName: `${$json.company.replace(/\\s+/g,'-')}.html`\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        304
+      ],
+      "id": "e127c47e-358e-4bf3-a391-45d41845a7b1",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      company: \"Gulati Dental Clinic\",\n      website: \"https://www.gulaticlinic.com/\"\n    }\n  },\n  {\n    json: {\n      company: \"Mehta Transport Group\",\n      website: \"https://mehtatransportcorporations.com/\"\n    }\n  },\n  {\n    json: {\n      company: \"Yashoda Hospital\",\n      website: \"https://www.yashodahospital.org/\"\n    }\n  },\n  {\n    json: {\n      company: \"Broken Test\",\n      website: \"https://does-not-exist-123456.com\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        304
+      ],
+      "id": "77da193c-7f4b-4361-949b-b08ea878366d",
+      "name": "Prospect Loader",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.website}}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        656,
+        304
+      ],
+      "id": "e279f016-11a5-4f64-8d55-a67a16a08eec",
+      "name": "Website Scraper",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "pythonNative",
+        "pythonCode": "html = _item[\"json\"].get(\"data\", \"\")\n\n# Remove script blocks\nwhile \"<script\" in html.lower() and \"</script>\" in html.lower():\n    lower_html = html.lower()\n    start = lower_html.find(\"<script\")\n    end = lower_html.find(\"</script>\", start)\n\n    if end == -1:\n        break\n\n    html = html[:start] + html[end + 9:]\n\n# Remove style blocks\nwhile \"<style\" in html.lower() and \"</style>\" in html.lower():\n    lower_html = html.lower()\n    start = lower_html.find(\"<style\")\n    end = lower_html.find(\"</style>\", start)\n\n    if end == -1:\n        break\n\n    html = html[:start] + html[end + 8:]\n\n# Remove nav blocks\nwhile \"<nav\" in html.lower() and \"</nav>\" in html.lower():\n    lower_html = html.lower()\n    start = lower_html.find(\"<nav\")\n    end = lower_html.find(\"</nav>\", start)\n\n    if end == -1:\n        break\n\n    html = html[:start] + html[end + 6:]\n\n# Remove footer blocks\nwhile \"<footer\" in html.lower() and \"</footer>\" in html.lower():\n    lower_html = html.lower()\n    start = lower_html.find(\"<footer\")\n    end = lower_html.find(\"</footer>\", start)\n\n    if end == -1:\n        break\n\n    html = html[:start] + html[end + 9:]\n\n# Remove all remaining HTML tags\ntext = []\ninside_tag = False\n\nfor ch in html:\n\n    if ch == \"<\":\n        inside_tag = True\n\n    elif ch == \">\":\n        inside_tag = False\n        text.append(\" \")\n\n    elif not inside_tag:\n        text.append(ch)\n\ntext = \"\".join(text)\n\n# Normalize whitespace\ntext = \" \".join(text.split())\n\n# Limit content size\ntext = text[:5000]\n\nreturn {\n    \"company\": _item[\"json\"].get(\"company\", \"\"),\n    \"website\": _item[\"json\"].get(\"website\", \"\"),\n    \"content\": text\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        304
+      ],
+      "id": "5baaf5d5-c717-4ef5-9326-e35c1b5cea4a",
+      "name": "Content Cleaner"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an automation consultant.\n\nAnalyze the company using ONLY the website content provided.\n\nCompany: {{$json.company}}\n\nWebsite: {{$json.website}}\n\nWebsite Content:\n{{$json.content}}\n\nPRIMARY OBJECTIVE\n\nIdentify ONE operational workflow that is clearly visible from the website and could plausibly benefit from automation.\n\nIMPORTANT:\n\nA thin but honest recommendation is better than an impressive but speculative recommendation.\n\nInventing a problem the company does not have is a failure.\n\nGROUNDING RULES\n\n- Use ONLY information present in the website content.\n- Never invent facts.\n- Never invent workflows.\n- Never assume manual work.\n- Never assume staff involvement.\n- Never assume scheduling conflicts.\n- Never assume customer complaints.\n- Never assume inefficiencies.\n- Never use statistics.\n- Never mention ROI.\n- Never mention hours saved.\n\nONLY consider workflows that are explicitly visible on the website:\n\n- Appointment booking\n- Quote requests\n- Contact forms\n- Lead forms\n- Service inquiries\n- Demo requests\n- Job applications\n- Order tracking\n- Support requests\n\nIf there is insufficient evidence, use this exact sentence:\n\n\"It is unclear how this process is currently handled, but it may be a candidate for automation.\"\n\nReturn RAW JSON ONLY.\n\nDO NOT use markdown.\n\nDO NOT wrap JSON in code fences.\n\nThe first character must be {\nThe last character must be }\n\n{\n  \"company\": \"\",\n  \"workflow_found\": true,\n  \"confidence\": \"High\",\n  \"evidence\": [\n    \"\"\n  ],\n  \"pain_spotted\": \"\",\n  \"proposed_automation\": \"\",\n  \"workflow_steps\": [\n    \"\",\n    \"\",\n    \"\",\n    \"\"\n  ],\n  \"benefits\": [\n    \"\",\n    \"\",\n    \"\"\n  ],\n  \"outreach_hook\": \"\",\n  \"cold_email\": \"\"\n}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1088,
+        304
+      ],
+      "id": "93ef3260-b80a-48a9-ae05-473024d2eb1c",
+      "name": "Automation Opportunity Analyzer"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let text = $json.text || \"\";\n\ntext = text\n  .replace(/^```json\\s*/i, \"\")\n  .replace(/^```\\s*/i, \"\")\n  .replace(/```$/i, \"\")\n  .trim();\n\nconst data = JSON.parse(text);\n\nconst html = `\n<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\nbody{\n  font-family: Arial, sans-serif;\n  max-width: 900px;\n  margin: 40px auto;\n  padding: 20px;\n  line-height: 1.7;\n  color:#1f2937;\n}\n\nh1{\n  color:#1e3a8a;\n  font-size:38px;\n}\n\nh2{\n  color:#4f46e5;\n  text-transform:uppercase;\n  margin-top:35px;\n  font-size:22px;\n}\n\n.workflow{\n  display:flex;\n  gap:10px;\n  margin-top:20px;\n  flex-wrap:wrap;\n}\n\n.step{\n  border:2px solid #6366f1;\n  border-radius:10px;\n  padding:15px;\n  width:150px;\n  text-align:center;\n  background:#f8fafc;\n}\n\n.cta{\n  background:#eef2ff;\n  padding:20px;\n  border-radius:12px;\n  margin-top:30px;\n  font-size:24px;\n  font-weight:bold;\n  color:#4f46e5;\n}\n\n.email{\n  border:1px solid #ddd;\n  border-radius:12px;\n  padding:20px;\n  background:#fafafa;\n}\n</style>\n</head>\n<body>\n\n<h1>The Automation We'd Build for ${data.company}</h1>\n\n<h2>Pain We Spotted</h2>\n<p>${data.pain_spotted}</p>\n\n<h2>The Automation We'd Build</h2>\n<p>${data.proposed_automation}</p>\n\n<h2>How It Would Work</h2>\n\n<div class=\"workflow\">\n${(data.workflow_steps || []).map(step => `<div class=\"step\">${step}</div>`).join('')}\n</div>\n\n<h2>Expected Benefits</h2>\n\n<ul>\n${(data.benefits || []).map(b => `<li>${b}</li>`).join('')}\n</ul>\n\n<div class=\"cta\">\n${data.outreach_hook || \"\"}\n</div>\n\n<h2>Cold Email Snippet</h2>\n\n<div class=\"email\">\n${data.cold_email || \"\"}\n</div>\n\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    company: data.company,\n    html: html\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        304
+      ],
+      "id": "8bb90151-2a35-48ab-a223-4a294f1a20c6",
+      "name": "Artifact Generator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \"Test workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Prospect Loader",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Automation Opportunity Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prospect Loader": {
+      "main": [
+        [
+          {
+            "node": "Website Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Scraper": {
+      "main": [
+        [
+          {
+            "node": "Content Cleaner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Cleaner": {
+      "main": [
+        [
+          {
+            "node": "Automation Opportunity Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Automation Opportunity Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Artifact Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Artifact Generator": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "377e7ad0-d66b-4bfe-ab4c-c0d8a5f4ff5d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d7218458a23876ef912ac779a5b4824f18c482e468bcfc0728ab721947697bf8"
+  },
+  "nodeGroups": [],
+  "id": "VeWSK7WUEivJowdV",
+  "tags": []
+}
