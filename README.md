@@ -1,142 +1,118 @@
 # Tailored Mini-Demo Generator
 
-## What the System Generates
+## Overview
 
-For each prospect, the workflow creates a one-page artifact titled:
+This project generates personalized automation proposals for prospects based on their website content.
+
+Given a website URL, the workflow researches the prospect, identifies a realistic manual process that could be automated, and generates a one-page artifact titled:
 
 **"The Automation We'd Build for [Company]"**
 
-The artifact contains:
+Each artifact includes:
 
-* Spotted Pain Point
-* Proposed Automation
-* Workflow Diagram / Process Flow
-* Call-to-Action (CTA)
-* Personalized Cold Email Snippet
+* Spotted pain point
+* Proposed automation
+* Workflow diagram / process flow
+* CTA line
+* Personalized cold email snippet
 
-The recommendations are generated using information extracted from the prospect's website and are designed to be specific to the business rather than generic automation suggestions.
-
----
-
-## High-Level Workflow
-
-```text
-Input Prospect URL
-        │
-        ▼
- Website Research
-        │
-        ▼
- Content Extraction
-        │
-        ▼
- Content Cleaning
-        │
-        ▼
- Automation Opportunity Identification
-        │
-        ▼
- Artifact Generation
-        │
-        ▼
- HTML Report Creation
-        │
-        ▼
- Output Storage
-```
+The goal was to create recommendations that are grounded in the prospect's actual business rather than generic automation suggestions.
 
 ---
 
-## Agent vs Workflow Decisions
+## My Approach
 
-### Workflow Components
+I used **n8n as the orchestration layer** and kept the workflow as simple as possible.
 
-#### Website Research
+### Workflow
 
-Responsible for:
+Prospect URL
+→ Website Research
+→ Content Cleaning
+→ Automation Opportunity Identification
+→ Artifact Generation
+→ HTML Output
 
-* Fetching website content
-* Extracting relevant text
+I intentionally used AI only for identifying the automation opportunity and generating personalized messaging.
 
-Reason:
+Website scraping, content cleaning, formatting, and HTML generation are deterministic tasks and were implemented as workflow logic rather than agent steps.
 
-No reasoning is required. The task is purely data collection.
-
----
-
-#### Content Cleaning
-
-Responsible for:
-
-* Removing navigation text
-* Removing duplicate content
-* Filtering irrelevant sections
-* Preparing context for the model
-
-Reason:
-
-This is a deterministic transformation problem and does not require an agent.
+This keeps the workflow more reliable, easier to debug, and cheaper to run.
 
 ---
 
-#### HTML Generation
+## Key Decisions
 
-Responsible for:
+### Where I Used an Agent
 
-* Formatting the final artifact
-* Applying templates
-* Generating standardized reports
+* Identifying automation opportunities
+* Generating personalized outreach content
 
-Reason:
+These tasks require contextual reasoning and judgment.
 
-Output structure is fixed and predictable.
+### Where I Did Not Use an Agent
 
----
+* Website scraping
+* Content extraction
+* Content cleaning
+* HTML generation
 
-### Agent Component
-
-#### Automation Opportunity Identification
-
-Responsibilities:
-
-* Understanding website content
-* Identifying a realistic manual process
-* Proposing a relevant automation
-* Creating a personalized CTA
-* Generating a cold email snippet
-
-Reason:
-
-This requires contextual reasoning and judgment, making it the only stage where an LLM is necessary.
+These tasks are deterministic and do not benefit from AI.
 
 ---
 
-## Sample Output Structure
+## What I Scoped Out
 
-### The Automation We'd Build for [Company]
+To keep the project focused, I deliberately did not implement:
 
-#### Spotted Pain Point
+* Deep website crawling
+* CRM integrations
+* Automated email sending
+* Multi-agent architecture
+* Lead scoring
+* Prospect enrichment from LinkedIn or external sources
 
-Manual process identified from website content.
-
-#### Proposed Automation
-
-Suggested automation workflow.
-
-#### Process Flow
-
-Simple workflow diagram or step sequence.
-
-#### CTA
-
-One-line personalized outreach hook.
-
-#### Cold Email Snippet
-
-Personalized email referencing the generated proposal.
+The assignment emphasized approach and reasoning, so I focused on delivering a working core system.
 
 ---
 
-## Key Takeaway
+## What I'd Build Next
 
-The primary goal of this project was not to maximize AI usage but to apply it selectively where reasoning adds value. Deterministic workflow steps handle data collection and transformation, while the agent is reserved for business analysis and automation opportunity identification.
+Given more time, I would add:
+
+* Multi-page website research
+* LinkedIn and company enrichment
+* Lead prioritization and scoring
+* CRM integrations (HubSpot/Salesforce)
+* PDF export
+* Human review before outreach
+* Performance tracking for generated recommendations
+
+---
+
+## Running the Project
+
+### Prerequisites
+
+* n8n
+* Gemini API Key (or equivalent LLM provider)
+
+### Steps
+
+1. Import `workflow.json` into n8n.
+2. Configure API credentials.
+3. Provide a list of prospect URLs.
+4. Execute the workflow.
+5. Generated HTML artifacts will be written to the output folder.
+
+---
+
+## Deliverables
+
+* `workflow.json`
+* Sample prospect inputs
+* Generated HTML artifacts
+* Workflow screenshot
+* README
+
+The project prioritizes grounded recommendations, bounded research costs, and clear separation between workflow logic and agent reasoning.
