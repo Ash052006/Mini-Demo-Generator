@@ -34,9 +34,6 @@ Content Cleaning
 
 ↓
 
-Business Analysis
-
-↓
 
 Automation Opportunity Identification
 
